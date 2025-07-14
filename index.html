@@ -1,10 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커브 구간 적정 속도 계산기</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="container">
+    <h1>커브 구간 적정 속도 계산기️</h1>
+    <h2>By.강솔민</h2>
 
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('car', this)">자동차</button>
+        <button class="tab" onclick="showTab('bicycle', this)">자전거</button>
+        <button class="tab" onclick="showTab('running', this)">달리기</button>
+        <button class="tab" onclick="showTab('compare', this)">종합 비교</button>
+    </div>
+
+    <div id="car" class="content active">
+        <h2>자동차 커브 주행 속도 계산</h2>
+        <div class="grid">
+            <div>
+                <div class="input-group">
+                    <label for="car-radius">커브 반경 (m)</label>
+                    <input type="number" id="car-radius" value="50" min="10" max="500">
+                </div>
+                <div class="input-group">
+                    <label for="car-surface">노면 상태</label>
+                    <select id="car-surface">
+                        <option value="0.85">건조한 아스팔트 (μ=0.85)</option>
+                        <option value="0.6">젖은 아스팔트 (μ=0.6)</option>
+                        <option value="0.5">자갈길 (μ=0.5)</option>
+                        <option value="0.25">눈길 (μ=0.25)</option>
+                        <option value="0.15">빙판길 (μ=0.15)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="car-bank">뱅크각 (도) - 평지는 0</label>
+                    <input type="number" id="car-bank" value="0" min="0" max="45">
+                </div>
+                <button class="button" onclick="calculateCar()">계산하기</button>
+            </div>
+            <div id="car-result" class="result" style="display: none;">
+                <h3>계산 결과</h3>
+                <div id="car-result-content"></div>
+            </div>
+        </div>
+        <div class="info-box">
+            <h4>💡 계산 원리</h4>
+            <p>자동차의 커브 주행 시 최대 속도는 타이어와 노면 사이의 마찰력에 의해 결정됩니다. 평탄한 도로에서는 $v_{max} = \sqrt{\mu \cdot g \cdot r}$ 공식을 사용하며, 뱅크각이 있는 경우 중력의 수평 성분이 추가로 구심력을 제공합니다.</p>
+        </div>
+    </div>
+
+    <div id="bicycle" class="content">
+        <h2>자전거 코너링 계산</h2>
+        <div class="grid">
+            <div>
+                <div class="input-group">
+                    <label for="bike-radius">커브 반경 (m)</label>
+                    <input type="number" id="bike-radius" value="30" min="5" max="200">
+                </div>
+                <div class="input-group">
+                    <label for="bike-speed">주행 속도 (km/h)</label>
+                    <input type="number" id="bike-speed" value="30" min="10" max="60">
+                </div>
+                <div class="input-group">
+                    <label for="bike-max-lean">최대 기울임 각도 (도)</label>
+                    <input type="number" id="bike-max-lean" value="45" min="20" max="60">
+                </div>
+                <button class="button" onclick="calculateBicycle()">계산하기</button>
+            </div>
+            <div id="bicycle-result" class="result" style="display: none;">
+                <h3>계산 결과</h3>
+                <div id="bicycle-result-content"></div>
+            </div>
+        </div>
+        <div class="info-box">
+            <h4>💡 계산 원리</h4>
+            <p>자전거는 라이더가 몸을 기울여 구심력을 만듭니다. 필요한 기울임 각도는 $\tan(\theta) = v^2 / (g \cdot r)$ 공식으로 계산됩니다. 카운터 스티어링을 통해 효과적으로 기울임을 제어할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <div id="running" class="content">
+        <h2>곡선 주로 달리기 계산</h2>
+        <div class="grid">
+            <div>
+                <div class="input-group">
+                    <label for="run-radius">트랙 커브 반경 (m)</label>
+                    <input type="number" id="run-radius" value="20" min="10" max="50">
+                </div>
+                <div class="input-group">
+                    <label for="run-straight-speed">직선 속도 (km/h)</label>
+                    <input type="number" id="run-straight-speed" value="15" min="8" max="25">
+                </div>
+                <div class="input-group">
+                    <label for="run-bank">트랙 뱅크각 (도) - 평지는 0</label>
+                    <input type="number" id="run-bank" value="0" min="0" max="18">
+                </div>
+                <button class="button" onclick="calculateRunning()">계산하기</button>
+            </div>
+            <div id="running-result" class="result" style="display: none;">
+                <h3>계산 결과</h3>
+                <div id="running-result-content"></div>
+            </div>
+        </div>
+        <div class="info-box">
+            <h4>💡 계산 원리</h4>
+            <p>주자는 지면 반발력의 내외측 성분으로 구심력을 생성합니다. 근육의 힘 예산 한계로 인해 곡선에서는 속도가 감소합니다. 뱅크가 있는 트랙은 이러한 부담을 줄여줍니다.</p>
+        </div>
+    </div>
+
+    <div id="compare" class="content">
+        <h2>종합 비교 분석</h2>
+        <div class="input-group">
+            <label for="compare-radius">커브 반경 (m)</label>
+            <input type="number" id="compare-radius" value="50" min="10" max="200">
+        </div>
+        <div class="input-group">
+            <label for="compare-surface">노면 상태</label>
+            <select id="compare-surface">
+                <option value="0.85">건조한 아스팔트</option>
+                <option value="0.6">젖은 아스팔트</option>
+                <option value="0.5">자갈길</option>
+                <option value="0.25">눈길</option>
+                <option value="0.15">빙판길</option>
+            </select>
+        </div>
+        <button class="button" onclick="compareAll()">비교 분석</button>
+        <div id="compare-result" class="result" style="display: none;">
+            <h3>종합 비교 결과</h3>
+            <div id="compare-result-content"></div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js" defer></script>
 </body>
 </html>
